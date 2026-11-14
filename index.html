@@ -38,31 +38,9 @@
   </header>
   <main id="main">
     <section class="hero">
-        <div class="orb" aria-hidden="false">
-          <svg viewBox="0 0 200 200" role="img" aria-label="A glass bubble with an orange countdown ring that slowly drains.">
-            <defs>
-              <radialGradient id="bubbleFill" cx="36%" cy="30%" r="72%">
-                <stop offset="0%" stop-color="#8b93a4"/>
-                <stop offset="18%" stop-color="#3a4252"/>
-                <stop offset="48%" stop-color="#141822"/>
-                <stop offset="100%" stop-color="#0b0d14"/>
-              </radialGradient>
-              <linearGradient id="orangeRing" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#ffd08a"/>
-                <stop offset="50%" stop-color="#f69046"/>
-                <stop offset="100%" stop-color="#e06828"/>
-              </linearGradient>
-            </defs>
-            <circle cx="100" cy="100" r="68" fill="none" stroke="rgba(244,240,232,0.16)" stroke-width="1.1"/>
-            <circle cx="100" cy="100" r="57" fill="url(#bubbleFill)" stroke="rgba(244,240,232,0.22)" stroke-width="0.85"/>
-            <ellipse cx="81" cy="78" rx="17" ry="11" fill="#fff" opacity="0.16"/>
-            <ellipse cx="76" cy="74" rx="6" ry="3.2" fill="#fff" opacity="0.38"/>
-            <g transform="rotate(-90 100 100)">
-              <circle class="ring-arc ring-glow" cx="100" cy="100" r="36" fill="none" stroke="#f69046" stroke-width="8" stroke-linecap="round"/>
-              <circle class="ring-arc" cx="100" cy="100" r="36" fill="none" stroke="url(#orangeRing)" stroke-width="5.25" stroke-linecap="round"/>
-            </g>
-          </svg>
-        </div>
+      <div class="hero-icon">
+        <img src="images/icon.png" width="1024" height="1024" alt="The Blurzo icon, a glass bubble with an orange countdown ring.">
+      </div>
       <div class="hero-copy">
         <h1>Blurzo</h1>
         <p class="line">Dim the room around your desk.</p>
@@ -73,39 +51,13 @@
     <section class="idea">
       <div class="wrap">
         <h2>Your desk stays in the light.</h2>
-          <div class="stage">
-            <svg viewBox="0 0 1000 520" role="img" aria-label="A desk in a pool of warm light, with the room around it fading into darkness.">
-              <defs>
-                <radialGradient id="air" cx="50%" cy="28%" r="58%">
-                  <stop offset="0%" stop-color="#f6b56a" stop-opacity="0.28"/>
-                  <stop offset="42%" stop-color="#f69046" stop-opacity="0.07"/>
-                  <stop offset="100%" stop-color="#07060f" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="onDesk" cx="50%" cy="45%" r="52%">
-                  <stop offset="0%" stop-color="#ffc27a" stop-opacity="0.7"/>
-                  <stop offset="32%" stop-color="#f69046" stop-opacity="0.32"/>
-                  <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
-                </radialGradient>
-                <linearGradient id="deskTop" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#3a322c"/>
-                  <stop offset="100%" stop-color="#161210"/>
-                </linearGradient>
-                <linearGradient id="deskFront" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#2a2420"/>
-                  <stop offset="100%" stop-color="#0c0b10"/>
-                </linearGradient>
-                <clipPath id="deskClip">
-                  <path d="M210 268 L790 268 L916 392 L84 392 Z"/>
-                </clipPath>
-              </defs>
-              <ellipse cx="500" cy="210" rx="460" ry="240" fill="url(#air)"/>
-              <path d="M210 268 L790 268 L916 392 L84 392 Z" fill="url(#deskTop)"/>
-              <ellipse cx="500" cy="328" rx="270" ry="64" fill="url(#onDesk)" clip-path="url(#deskClip)"/>
-              <path d="M210 268 L790 268 L802 276 L198 276 Z" fill="#f6e4c8" opacity="0.28"/>
-              <path d="M84 392 L916 392 L900 414 L100 414 Z" fill="url(#deskFront)"/>
-              <path d="M84 392 L916 392 L916 395 L84 395 Z" fill="#f6e4c8" opacity="0.2"/>
-            </svg>
-          </div>
+        <!-- Photo: Yury Rymko, Pexels. https://www.pexels.com/photo/powered-on-gold-desk-lamp-on-desk-with-opened-book-2168382/ Pexels License (free commercial use, attribution not required). -->
+        <figure class="stage">
+          <picture>
+            <source type="image/webp" srcset="images/desk.webp">
+            <img src="images/desk.jpg" width="2400" height="1350" alt="A brass desk lamp lighting an open book on a desk, with the room around it in darkness.">
+          </picture>
+        </figure>
         <p class="honesty">The app doesn&rsquo;t blur the camera feed. It dims the room with a virtual bubble and leaves your desk open.</p>
       </div>
     </section>
@@ -114,73 +66,23 @@
       <div class="wrap">
         <h2>Two depths.</h2>
         <div class="depths">
-          <figure class="depth">
-            <svg viewBox="0 0 520 360" role="img" aria-label="A desk in a wider, softer pool of light.">
-              <defs>
-                <radialGradient id="air-dim" cx="50%" cy="30%" r="58%">
-                  <stop offset="0%" stop-color="#f6b56a" stop-opacity="0.30"/>
-                  <stop offset="50%" stop-color="#f69046" stop-opacity="0.08"/>
-                  <stop offset="100%" stop-color="#07060f" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="on-dim" cx="50%" cy="45%" r="52%">
-                  <stop offset="0%" stop-color="#ffc27a" stop-opacity="0.62"/>
-                  <stop offset="34%" stop-color="#f69046" stop-opacity="0.28"/>
-                  <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
-                </radialGradient>
-                <linearGradient id="top-dim" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#3a322c"/>
-                  <stop offset="100%" stop-color="#161210"/>
-                </linearGradient>
-                <linearGradient id="front-dim" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#2a2420"/>
-                  <stop offset="100%" stop-color="#0c0b10"/>
-                </linearGradient>
-                <clipPath id="clip-dim">
-                  <path d="M90 188 L430 188 L500 268 L50 268 Z"/>
-                </clipPath>
-              </defs>
-              <ellipse cx="260" cy="150" rx="260" ry="150" fill="url(#air-dim)"/>
-              <path d="M90 188 L430 188 L500 268 L50 268 Z" fill="url(#top-dim)"/>
-              <ellipse cx="260" cy="226" rx="168" ry="50" fill="url(#on-dim)" clip-path="url(#clip-dim)"/>
-              <path d="M90 188 L430 188 L436 194 L84 194 Z" fill="#f6e4c8" opacity="0.28"/>
-              <path d="M50 268 L500 268 L488 284 L62 284 Z" fill="url(#front-dim)"/>
-              <path d="M50 268 L500 268 L500 271 L50 271 Z" fill="#f6e4c8" opacity="0.16"/>
-            </svg>
+          <figure class="depth depth-dim">
+            <div class="depth-frame">
+              <picture>
+                <source type="image/webp" srcset="images/desk.webp">
+                <img src="images/desk.jpg" width="2400" height="1350" alt="The same desk with a softer, wider surround of light.">
+              </picture>
+            </div>
             <figcaption>Dim</figcaption>
             <p>A softer surround.</p>
           </figure>
-          <figure class="depth">
-            <svg viewBox="0 0 520 360" role="img" aria-label="A desk in a tight, darker pool of light.">
-              <defs>
-                <radialGradient id="air-deep" cx="50%" cy="30%" r="58%">
-                  <stop offset="0%" stop-color="#f6b56a" stop-opacity="0.10"/>
-                  <stop offset="50%" stop-color="#f69046" stop-opacity="0.03"/>
-                  <stop offset="100%" stop-color="#07060f" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="on-deep" cx="50%" cy="45%" r="52%">
-                  <stop offset="0%" stop-color="#ffc27a" stop-opacity="0.38"/>
-                  <stop offset="34%" stop-color="#f69046" stop-opacity="0.12"/>
-                  <stop offset="100%" stop-color="#1a1410" stop-opacity="0"/>
-                </radialGradient>
-                <linearGradient id="top-deep" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#3a322c"/>
-                  <stop offset="100%" stop-color="#161210"/>
-                </linearGradient>
-                <linearGradient id="front-deep" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#2a2420"/>
-                  <stop offset="100%" stop-color="#0c0b10"/>
-                </linearGradient>
-                <clipPath id="clip-deep">
-                  <path d="M90 188 L430 188 L500 268 L50 268 Z"/>
-                </clipPath>
-              </defs>
-              <ellipse cx="260" cy="150" rx="180" ry="110" fill="url(#air-deep)"/>
-              <path d="M90 188 L430 188 L500 268 L50 268 Z" fill="url(#top-deep)"/>
-              <ellipse cx="260" cy="226" rx="108" ry="32" fill="url(#on-deep)" clip-path="url(#clip-deep)"/>
-              <path d="M90 188 L430 188 L436 194 L84 194 Z" fill="#f6e4c8" opacity="0.1"/>
-              <path d="M50 268 L500 268 L488 284 L62 284 Z" fill="url(#front-deep)"/>
-              <path d="M50 268 L500 268 L500 271 L50 271 Z" fill="#f6e4c8" opacity="0.07"/>
-            </svg>
+          <figure class="depth depth-deep">
+            <div class="depth-frame">
+              <picture>
+                <source type="image/webp" srcset="images/desk.webp">
+                <img src="images/desk.jpg" width="2400" height="1350" alt="The same desk with a tighter, darker pool of light.">
+              </picture>
+            </div>
             <figcaption>Deep</figcaption>
             <p>Less of the room at the edges.</p>
           </figure>
