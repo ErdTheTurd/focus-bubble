@@ -1,1 +1,178 @@
-delete me
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blurzo for Apple Vision Pro</title>
+  <meta name="description" content="Blurzo is a Vision Pro app that wraps the room around your desk in a dark virtual bubble while you work a timer. Your desk stays visible. Everything else fades back.">
+  <link rel="canonical" href="https://erdtheturd.github.io/focus-bubble/">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#0a0819">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Blurzo">
+  <meta property="og:title" content="Blurzo for Apple Vision Pro">
+  <meta property="og:description" content="Blurzo is a Vision Pro app that wraps the room around your desk in a dark virtual bubble while you work a timer. Your desk stays visible. Everything else fades back.">
+  <meta property="og:url" content="https://erdtheturd.github.io/focus-bubble/">
+  <meta property="og:image" content="https://erdtheturd.github.io/focus-bubble/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Blurzo for Apple Vision Pro">
+  <meta name="twitter:description" content="Blurzo is a Vision Pro app that wraps the room around your desk in a dark virtual bubble while you work a timer. Your desk stays visible. Everything else fades back.">
+  <meta name="twitter:image" content="https://erdtheturd.github.io/focus-bubble/images/og.jpg">
+  <!-- TODO: once blurzo.com is live, change canonical, og:url, og:image, and twitter:image to https://blurzo.com/ (and /privacy.html, /support.html, /images/og.jpg) -->
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="index.html">
+        <img src="images/icon-256.png" width="64" height="64" alt="">
+        Blurzo
+      </a>
+      <nav class="nav" aria-label="Site">
+        <a href="privacy.html">Privacy</a>
+        <a href="support.html">Support</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div class="hero-inner">
+        <img class="hero-icon" src="images/icon-256.png" width="256" height="256" alt="Blurzo app icon: an orange countdown ring inside a glass bubble, on a dark navy field.">
+        <p class="hero-name">Blurzo</p>
+        <hr class="accent">
+        <h1>Dim the room around your desk.</h1>
+        <p class="lead">Start a timer, and a dark virtual bubble fades in around the room, with an opening over your desk. When the time is up, the bubble fades away.</p>
+        <div class="hero-actions">
+          <!-- TODO: replace href="#" with the App Store URL once the listing is live -->
+        <a class="store-badge on-dark" href="#" aria-label="Download on the App Store">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27 1.82-.04.03-.91.05-1.22.05-1.11 0-2.18-1.42-3.02-2.63C2.25 16.97.94 12.45 2.7 9.39 3.57 7.87 5.13 6.91 6.82 6.88c1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83ZM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19C14.21 6.04 13.07 6.7 11.95 6.61 11.8 5.46 12.36 4.26 13 3.5Z"/>
+    </svg>
+          <span class="label">
+            <span class="small">Download on the</span>
+            <span class="big">App Store</span>
+          </span>
+        </a>
+        </div>
+        <figure class="hero-shot">
+          <picture>
+            <source type="image/webp" srcset="images/session-deep-800.webp 800w, images/session-deep-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 2.5rem), 72rem">
+            <img src="images/session-deep-1600.jpg" srcset="images/session-deep-800.jpg 800w, images/session-deep-1600.jpg 1600w" sizes="(max-width: 860px) calc(100vw - 2.5rem), 72rem" width="1600" height="900" alt="A Blurzo session in Deep mode on Apple Vision Pro. The living room is darkened except for a bright opening over the desk, and a glass timer reads 24:55." fetchpriority="high">
+          </picture>
+        </figure>
+        <p class="shot-caption">Deep mode, mid-session, on Apple Vision Pro.</p>
+      </div>
+    </section>
+
+    <div class="features">
+      <section class="block">
+        <div class="wrap split">
+          <h2>The opening stays over your desk.</h2>
+          <div class="split-copy">
+            <p>The name says blur, but the app does not blur the camera feed. It dims and covers the room with a virtual bubble, and leaves an opening over your desk.</p>
+            <p>On a physical Vision Pro, it can look for a table and place the opening on that surface. If it does not find one — and in the Simulator — it uses a built-in desk zone in front of you.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="wrap">
+          <div class="block-copy">
+            <h2>Dim, or Deep.</h2>
+            <p>Dim takes the edge off the room. Deep is darker, for the hours when you want less of the world at the edges of your vision. Choose one before you start.</p>
+          </div>
+          <div class="pair">
+            <figure>
+              <div class="shot">
+                <picture>
+                  <source type="image/webp" srcset="images/session-dim-800.webp 800w, images/session-dim-1600.webp 1600w" sizes="(max-width: 800px) calc(100vw - 2.5rem), 35rem">
+                  <img src="images/session-dim-1600.jpg" srcset="images/session-dim-800.jpg 800w, images/session-dim-1600.jpg 1600w" sizes="(max-width: 800px) calc(100vw - 2.5rem), 35rem" width="1600" height="900" alt="Dim mode: the room is only slightly darkened, with a glass timer at 24:56 and Pause and End buttons below.">
+                </picture>
+              </div>
+              <figcaption>
+                <strong>Dim</strong>
+                <span>A softer surround that takes the edge off.</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <div class="shot">
+                <picture>
+                  <source type="image/webp" srcset="images/session-deep-800.webp 800w, images/session-deep-1600.webp 1600w" sizes="(max-width: 800px) calc(100vw - 2.5rem), 35rem">
+                  <img src="images/session-deep-1600.jpg" srcset="images/session-deep-800.jpg 800w, images/session-deep-1600.jpg 1600w" sizes="(max-width: 800px) calc(100vw - 2.5rem), 35rem" width="1600" height="900" alt="Deep mode: the same room is much darker beyond the desk opening, with the timer at 24:55.">
+                </picture>
+              </div>
+              <figcaption>
+                <strong>Deep</strong>
+                <span>A darker bubble for uninterrupted work.</span>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="wrap">
+          <div class="block-copy">
+            <h2>You pick the length.</h2>
+            <p>Fifteen, twenty-five, fifty, or ninety minutes, or a length you set yourself, up to three hours. A small timer stays near the desk, so you can pause, resume, or end early. When time is up, a short chime plays and the bubble fades away.</p>
+          </div>
+          <ul class="durations" aria-label="Session lengths">
+            <li><strong>15</strong><span>minutes</span></li>
+            <li><strong>25</strong><span>minutes</span></li>
+            <li><strong>50</strong><span>minutes</span></li>
+            <li><strong>90</strong><span>minutes</span></li>
+            <li><strong>Custom</strong><span>up to 3 hours</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="wrap">
+          <div class="block-copy">
+            <h2>Then you can see what you did.</h2>
+            <p>After a session, Blurzo shows how long you worked, plus totals for today and all time. History lives on the headset. There is no account to create, and nothing is sent off the device. It works without a network connection.</p>
+          </div>
+          <figure class="shot">
+            <picture>
+              <source type="image/webp" srcset="images/session-done-800.webp 800w, images/session-done-1600.webp 1600w" sizes="(max-width: 860px) calc(100vw - 2.5rem), 72rem">
+              <img src="images/session-done-1600.jpg" srcset="images/session-done-800.jpg 800w, images/session-done-1600.jpg 1600w" sizes="(max-width: 860px) calc(100vw - 2.5rem), 72rem" width="1600" height="900" alt="The session complete screen after a 25-minute focus block, with buttons for History and New session, and the room returned to full brightness.">
+            </picture>
+          </figure>
+          <p class="shot-caption on-cream">When the timer ends, the bubble lifts and you can start another session or look back at your history.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="cta">
+      <div class="wrap">
+        <h2>For Apple Vision Pro.</h2>
+        <p>A visionOS app, coming to the App Store. No account, and nothing leaves your headset.</p>
+        <!-- TODO: replace href="#" with the App Store URL once the listing is live -->
+        <a class="store-badge on-dark" href="#" aria-label="Download on the App Store">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27 1.82-.04.03-.91.05-1.22.05-1.11 0-2.18-1.42-3.02-2.63C2.25 16.97.94 12.45 2.7 9.39 3.57 7.87 5.13 6.91 6.82 6.88c1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83ZM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19C14.21 6.04 13.07 6.7 11.95 6.61 11.8 5.46 12.36 4.26 13 3.5Z"/>
+    </svg>
+          <span class="label">
+            <span class="small">Download on the</span>
+            <span class="big">App Store</span>
+          </span>
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 Edward Dunn</p>
+      <nav aria-label="Footer">
+        <a href="privacy.html">Privacy</a>
+        <a href="support.html">Support</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
