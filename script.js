@@ -254,53 +254,50 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     var dust = [];
-    var DUST_CAP = 900;
-    function spawn(n, x, y, spread, burst) {
-      var i, a, sp, col, life, color;
+    var DUST_CAP = 70;
+    function spawnPuff(x, y, spread, burst, scale) {
       if (dust.length >= DUST_CAP) return;
-      if (dust.length + n > DUST_CAP) n = DUST_CAP - dust.length;
-      for (i = 0; i < n; i++) {
-        a = Math.random() * Math.PI * 2;
-        sp = (burst || 240) * (0.2 + Math.random());
-        col = Math.random();
-        life = 1.4 + Math.random() * 1.5;
-        if (col < 0.22) color = "255,248,236";
-        else if (col < 0.5) color = "236,226,210";
-        else if (col < 0.78) color = "255,196,120";
-        else color = "246,160,80";
-        dust.push({
-          x: x + (Math.random() - 0.5) * spread,
-          y: y + (Math.random() - 0.5) * spread,
-          vx: Math.cos(a) * sp,
-          vy: Math.sin(a) * sp * 0.55 - Math.random() * 160,
-          g: 260 + Math.random() * 240,
-          s: 1 + Math.random() * 3,
-          life: life,
-          age: 0,
-          swirl: (Math.random() - 0.5) * 2.4,
-          color: color
-        });
-      }
+      var a = Math.random() * Math.PI * 2;
+      var sp = (burst || 36) * (0.25 + Math.random() * 0.75);
+      var col = Math.random();
+      var color = col < 0.4 ? "166,156,144" : col < 0.75 ? "184,172,156" : "150,140,128";
+      dust.push({
+        x: x + (Math.random() - 0.5) * spread,
+        y: y + (Math.random() - 0.5) * spread,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp * 0.4 - Math.random() * 18,
+        g: 22 + Math.random() * 32,
+        r: (scale || 1) * (26 + Math.random() * 58),
+        grow: 10 + Math.random() * 22,
+        life: 2.4 + Math.random() * 1.1,
+        age: 0,
+        swirl: (Math.random() - 0.5) * 0.7,
+        a0: 0.12 + Math.random() * 0.18,
+        color: color
+      });
     }
-    spawn(320, ox, oy, 42, 460);
-    spawn(100, ox, oy, 110, 200);
+    var pi;
+    for (pi = 0; pi < 12; pi++) spawnPuff(ox, oy, 70, 46, 1);
+    for (pi = 0; pi < 6; pi++) spawnPuff(ox, oy, 50, 20, 1.6);
+    for (pi = 0; pi < 3; pi++) spawnPuff(ox, oy, 90, 12, 2.3);
     for (var si = 0; si < shards.length; si++) {
+      if (Math.random() > 0.55) continue;
       var sl = shards[si].el.getBoundingClientRect();
-      spawn(8, sl.left + sl.width / 2, sl.top + sl.height / 2, 18, 170);
+      spawnPuff(sl.left + sl.width / 2, sl.top + sl.height / 2, 22, 24, 0.75);
     }
 
     var t0 = performance.now();
     var last = t0;
     var gravity = 2000;
-    var DUST_END = 3000;
-    var HOLD = 420;
+    var DUST_END = 3200;
+    var HOLD = 560;
     var done = false;
 
     function frame(now) {
       var dt = Math.min(0.032, (now - last) / 1000);
       last = now;
       var t = now - t0;
-      var k, s, local, fade, p, alpha, sr;
+      var k, s, local, fade, p, alpha, sr, u, radius, grad, hz;
 
       for (k = 0; k < shards.length; k++) {
         s = shards[k];
@@ -315,33 +312,51 @@
           s.el.style.transform =
             "translate3d(" + s.x + "px," + s.y + "px,0) rotate(" + s.rot + "rad)";
           s.el.style.opacity = String(s.opacity);
-          if (t < 1800 && s.opacity > 0.12 && Math.random() < 0.2) {
+          if (t < 2000 && s.opacity > 0.16 && Math.random() < 0.07) {
             sr = s.el.getBoundingClientRect();
-            spawn(2, sr.left + sr.width / 2, sr.top + sr.height / 2, 12, 90);
+            spawnPuff(sr.left + sr.width / 2, sr.top + sr.height / 2, 16, 18, 0.7);
           }
         }
       }
 
       ctx.clearRect(0, 0, vw, vh);
+      hz = 0.1;
+      if (t < 350) hz = 0.1 * (t / 350);
+      else if (t > 1800) hz = 0.1 * (1 - Math.min(1, (t - 1800) / (DUST_END - 1800)));
+      grad = ctx.createRadialGradient(ox, oy + t * 0.035, 20, ox, oy + 50, Math.max(vw, vh) * 0.5);
+      grad.addColorStop(0, "rgba(168,158,146," + hz.toFixed(3) + ")");
+      grad.addColorStop(1, "rgba(168,158,146,0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, vw, vh);
+
       for (k = 0; k < dust.length; k++) {
         p = dust[k];
         p.age += dt;
         if (p.age > p.life) continue;
-        p.vx += Math.sin(t / 260 + p.swirl) * 50 * dt * p.swirl;
-        p.vy += Math.cos(t / 300) * 16 * dt;
+        p.vx += Math.sin(t / 900 + p.swirl) * 10 * dt * p.swirl;
         p.vy += p.g * dt;
-        p.vx *= 0.994;
+        p.vx *= 0.968;
+        p.vy *= 0.982;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        if (p.y > vh - 2) {
-          p.y = vh - 2;
-          p.vy *= -0.1;
-          p.vx *= 0.6;
+        if (p.y > vh - 8) {
+          p.y = vh - 8;
+          p.vy *= 0.15;
+          p.vx *= 0.7;
         }
-        alpha = Math.min(1, (1 - p.age / p.life) * 1.15);
-        if (alpha > 1) alpha = 1;
-        ctx.fillStyle = "rgba(" + p.color + "," + alpha.toFixed(3) + ")";
-        ctx.fillRect(p.x, p.y, p.s, p.s);
+        u = p.age / p.life;
+        fade = u < 0.18 ? u / 0.18 : 1 - (u - 0.18) / 0.82;
+        if (fade < 0) fade = 0;
+        alpha = p.a0 * fade;
+        radius = p.r + p.grow * u;
+        grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
+        grad.addColorStop(0, "rgba(" + p.color + "," + (alpha * 0.55).toFixed(3) + ")");
+        grad.addColorStop(0.4, "rgba(" + p.color + "," + (alpha * 0.28).toFixed(3) + ")");
+        grad.addColorStop(1, "rgba(" + p.color + ",0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       if (t < DUST_END) {
