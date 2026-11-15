@@ -442,16 +442,6 @@ a:hover { color: var(--orange-hot); }
   opacity: 0;
 }
 
-.icon-time {
-  margin: 0.8rem 0 0;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  font-size: 0.92rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
 
 /* Cap position is driven by JS so it stays on the ring. */
 .icon-cap.is-on {
