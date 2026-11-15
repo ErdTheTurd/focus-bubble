@@ -106,137 +106,351 @@
     window.setTimeout(resetAndEnter, 900);
   }
 
-  function roundedRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
+  function hash2(x, y, seed) {
+    var n = Math.sin(x * 127.1 + y * 311.7 + (seed || 0) * 74.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  function smoothstep(t) {
+    return t * t * (3 - 2 * t);
+  }
+
+  function vnoise(x, y, seed) {
+    var x0 = Math.floor(x);
+    var y0 = Math.floor(y);
+    var fx = x - x0;
+    var fy = y - y0;
+    var sx = smoothstep(fx);
+    var sy = smoothstep(fy);
+    var a = hash2(x0, y0, seed);
+    var b = hash2(x0 + 1, y0, seed);
+    var c = hash2(x0, y0 + 1, seed);
+    var d = hash2(x0 + 1, y0 + 1, seed);
+    return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+  }
+
+  function fbm(x, y, seed) {
+    var amp = 1;
+    var freq = 1;
+    var sum = 0;
+    var n = 0;
+    var i;
+    for (i = 0; i < 5; i++) {
+      sum += amp * vnoise(x * freq, y * freq, seed + i * 19);
+      n += amp;
+      amp *= 0.5;
+      freq *= 2.05;
+    }
+    return sum / n;
+  }
+
+  function makeSmokeSprite(size, seed) {
+    var c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    var cctx = c.getContext("2d");
+    var img = cctx.createImageData(size, size);
+    var data = img.data;
+    var cx = (size - 1) * 0.5;
+    var i, x, y, dx, dy, d, n, wisp, mask, a, r, g, b, warm, edge, dd;
+    for (y = 0; y < size; y++) {
+      for (x = 0; x < size; x++) {
+        dx = (x - cx) / cx;
+        dy = (y - cx) / cx;
+        d = Math.sqrt(dx * dx + dy * dy);
+        n = fbm(x / 16, y / 16, seed);
+        wisp = fbm(x / 8 + 8, y / 10 - 3, seed + 5);
+        edge = 0.72 + 0.5 * fbm(x / 12, y / 13, seed + 9);
+        dd = d / Math.max(0.35, edge);
+        mask = Math.max(0, 1 - dd);
+        mask = mask * (0.25 + 1.05 * n);
+        mask *= 0.35 + 1.05 * wisp;
+        if (mask > 1) mask = 1;
+        a = Math.pow(mask, 1.2) * 230;
+        if (a < 1) {
+          i = (y * size + x) * 4;
+          data[i + 3] = 0;
+          continue;
+        }
+        warm = 0.9 + n * 0.15;
+        r = 162 * warm;
+        g = 152 * warm;
+        b = 140 * warm;
+        i = (y * size + x) * 4;
+        data[i] = r;
+        data[i + 1] = g;
+        data[i + 2] = b;
+        data[i + 3] = a;
+      }
+    }
+    cctx.putImageData(img, 0, 0);
+    return c;
+  }
+
+  function centroid(poly) {
+    var x = 0;
+    var y = 0;
+    var i;
+    for (i = 0; i < poly.length; i++) {
+      x += poly[i][0];
+      y += poly[i][1];
+    }
+    return [x / poly.length, y / poly.length];
+  }
+
+  function intersectEdge(p, q, mx, my, nx, ny) {
+    var dx = q[0] - p[0];
+    var dy = q[1] - p[1];
+    var den = dx * nx + dy * ny;
+    if (Math.abs(den) < 1e-8) return [p[0], p[1]];
+    var t = ((mx - p[0]) * nx + (my - p[1]) * ny) / den;
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
+    return [p[0] + dx * t, p[1] + dy * t];
+  }
+
+  function clipByBisector(poly, a, b) {
+    var mx = (a[0] + b[0]) * 0.5;
+    var my = (a[1] + b[1]) * 0.5;
+    var nx = b[0] - a[0];
+    var ny = b[1] - a[1];
+    var out = [];
+    var n = poly.length;
+    var i, p, q, pin, qin;
+    for (i = 0; i < n; i++) {
+      p = poly[i];
+      q = poly[(i + 1) % n];
+      pin = (p[0] - mx) * nx + (p[1] - my) * ny <= 0;
+      qin = (q[0] - mx) * nx + (q[1] - my) * ny <= 0;
+      if (pin) out.push(p);
+      if (pin !== qin) out.push(intersectEdge(p, q, mx, my, nx, ny));
+    }
+    return out;
+  }
+
+  function voronoiCells(sites, w, h) {
+    var bounds = [
+      [0, 0],
+      [w, 0],
+      [w, h],
+      [0, h]
+    ];
+    var cells = [];
+    var i, j, poly;
+    for (i = 0; i < sites.length; i++) {
+      poly = bounds;
+      for (j = 0; j < sites.length; j++) {
+        if (i === j) continue;
+        poly = clipByBisector(poly, sites[i], sites[j]);
+        if (poly.length < 3) break;
+      }
+      if (poly.length >= 3) cells.push(poly);
+    }
+    return cells;
+  }
+
+  function jagPolygon(poly, amt) {
+    var out = [];
+    var i, p, q, mx, my, dx, dy, len, px, py, j;
+    for (i = 0; i < poly.length; i++) {
+      p = poly[i];
+      q = poly[(i + 1) % poly.length];
+      out.push(p);
+      dx = q[0] - p[0];
+      dy = q[1] - p[1];
+      len = Math.hypot(dx, dy);
+      if (len < 22) continue;
+      j = (Math.random() - 0.5) * amt;
+      mx = (p[0] + q[0]) * 0.5;
+      my = (p[1] + q[1]) * 0.5;
+      px = -dy / len;
+      py = dx / len;
+      // keep edges near the viewport frame almost straight
+      if (p[0] < 1 && q[0] < 1) continue;
+      if (p[1] < 1 && q[1] < 1) continue;
+      if (p[0] > vwTmp - 1 && q[0] > vwTmp - 1) continue;
+      if (p[1] > vhTmp - 1 && q[1] > vhTmp - 1) continue;
+      out.push([mx + px * j, my + py * j]);
+    }
+    return out;
+  }
+
+  var vwTmp = 0;
+  var vhTmp = 0;
+
+  function inflate(poly, px) {
+    var c = centroid(poly);
+    return poly.map(function (p) {
+      var dx = p[0] - c[0];
+      var dy = p[1] - c[1];
+      var d = Math.hypot(dx, dy) || 1;
+      return [p[0] + (dx / d) * px, p[1] + (dy / d) * px];
+    });
+  }
+
+  function placeSites(n, ox, oy, vw, vh) {
+    var sites = [];
+    var i, ang, r, x, y, ok, k, minD, tries;
+    var near = Math.round(n * 0.62);
+    minD = Math.min(vw, vh) * 0.04;
+    function add(x, y) {
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+      if (x > vw) x = vw;
+      if (y > vh) y = vh;
+      ok = true;
+      for (k = 0; k < sites.length; k++) {
+        if (Math.hypot(sites[k][0] - x, sites[k][1] - y) < minD) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) sites.push([x, y]);
+      return ok;
+    }
+    for (i = 0; i < near; i++) {
+      for (tries = 0; tries < 8; tries++) {
+        ang = Math.random() * Math.PI * 2;
+        r = Math.pow(Math.random(), 0.7) * Math.max(220, Math.min(vw, vh) * 0.38);
+        if (add(ox + Math.cos(ang) * r, oy + Math.sin(ang) * r)) break;
+      }
+    }
+    while (sites.length < n) {
+      if (!add(Math.random() * vw, Math.random() * vh)) {
+        minD *= 0.85;
+        if (minD < 8) add(Math.random() * vw, Math.random() * vh);
+      }
+      if (sites.length > 80) break;
+    }
+    return sites;
   }
 
   function shatter() {
     var vw = window.innerWidth;
     var vh = window.innerHeight;
+    vwTmp = vw;
+    vhTmp = vh;
     var origin = stage.getBoundingClientRect();
     var ox = origin.left + origin.width / 2;
     var oy = origin.top + origin.height / 2;
+    var ir = stage.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     var layer = document.createElement("div");
     layer.className = "shatter";
     layer.setAttribute("aria-hidden", "true");
 
     var shards = [];
+    var nSites = vw < 700 ? 26 : 36;
+    var sites = placeSites(nSites, ox, oy, vw, vh);
+    var cells = voronoiCells(sites, vw, vh);
+    var edges = [];
 
-    function addShard(el, x, y, w, h, force, wave) {
-      el.className = (el.className ? el.className + " " : "") + "shard";
-      el.style.left = x + "px";
-      el.style.top = y + "px";
-      el.style.width = w + "px";
-      el.style.height = h + "px";
+    function buildFilm() {
+      var film = document.createElement("div");
+      film.className = "shard-inner";
+      film.style.width = vw + "px";
+      film.style.height = vh + "px";
+      function stamp(sel) {
+        var src = document.querySelector(sel);
+        if (!src) return;
+        var r = src.getBoundingClientRect();
+        var clone = src.cloneNode(true);
+        clone.querySelectorAll("img, .icon-ring, .icon-track, .icon-cap, .hero-icon").forEach(function (node) {
+          node.remove();
+        });
+        clone.style.position = "absolute";
+        clone.style.left = r.left + "px";
+        clone.style.top = r.top + "px";
+        clone.style.width = r.width + "px";
+        clone.style.margin = "0";
+        film.appendChild(clone);
+      }
+      stamp(".site-header");
+      stamp(".hero-copy");
+      var icon = document.createElement("img");
+      var srcImg = stage.querySelector("img");
+      icon.src = srcImg ? srcImg.src : "images/icon-bare.png";
+      icon.alt = "";
+      icon.style.position = "absolute";
+      icon.style.left = ir.left + "px";
+      icon.style.top = ir.top + "px";
+      icon.style.width = ir.width + "px";
+      icon.style.height = ir.height + "px";
+      icon.style.borderRadius = "22.37%";
+      icon.style.display = "block";
+      film.appendChild(icon);
+      return film;
+    }
+
+    var ci, poly, bbox, minx, miny, maxx, maxy, p, el, film, cx, cy, dist, closeness, force, e, a, b, key, seen;
+    seen = {};
+    for (ci = 0; ci < cells.length; ci++) {
+      poly = jagPolygon(inflate(cells[ci], 0.8), 7);
+      if (poly.length < 3) continue;
+      minx = miny = 1e9;
+      maxx = maxy = -1e9;
+      for (e = 0; e < poly.length; e++) {
+        p = poly[e];
+        if (p[0] < minx) minx = p[0];
+        if (p[1] < miny) miny = p[1];
+        if (p[0] > maxx) maxx = p[0];
+        if (p[1] > maxy) maxy = p[1];
+        a = poly[e];
+        b = poly[(e + 1) % poly.length];
+        key =
+          Math.round(Math.min(a[0], b[0]) * 4) +
+          "," +
+          Math.round(Math.min(a[1], b[1]) * 4) +
+          "," +
+          Math.round(Math.max(a[0], b[0]) * 4) +
+          "," +
+          Math.round(Math.max(a[1], b[1]) * 4);
+        if (!seen[key]) {
+          seen[key] = true;
+          edges.push([a, b]);
+        }
+      }
+      if (maxx - minx < 8 || maxy - miny < 8) continue;
+      el = document.createElement("div");
+      el.className = "shard";
+      el.style.left = minx + "px";
+      el.style.top = miny + "px";
+      el.style.width = maxx - minx + "px";
+      el.style.height = maxy - miny + "px";
+      el.style.clipPath =
+        "polygon(" +
+        poly
+          .map(function (pt) {
+            return (pt[0] - minx).toFixed(2) + "px " + (pt[1] - miny).toFixed(2) + "px";
+          })
+          .join(",") +
+        ")";
+      film = buildFilm();
+      film.style.left = -minx + "px";
+      film.style.top = -miny + "px";
+      el.appendChild(film);
+      var mid = centroid(poly);
+      cx = mid[0];
+      cy = mid[1];
+      el.style.transformOrigin = cx - minx + "px " + (cy - miny) + "px";
       layer.appendChild(el);
-      var mx = x + w / 2;
-      var my = y + h / 2;
-      var dx = mx - ox;
-      var dy = my - oy;
-      var dist = Math.hypot(dx, dy) || 1;
+      dist = Math.hypot(cx - ox, cy - oy) || 1;
+      closeness = 1 - Math.min(1, dist / (Math.hypot(vw, vh) * 0.55));
+      force = 120 + closeness * 520 + Math.random() * 110;
       shards.push({
         el: el,
         x: 0,
         y: 0,
-        vx: (dx / dist) * force + (Math.random() - 0.5) * 150,
-        vy: (dy / dist) * force * 0.5 + (Math.random() - 0.5) * 110 - 180,
+        vx: ((cx - ox) / dist) * force + (Math.random() - 0.5) * 80,
+        vy: ((cy - oy) / dist) * force * 0.5 + (Math.random() - 0.5) * 70 - 80,
         rot: 0,
-        vr: (Math.random() - 0.5) * 2.5,
-        delay: dist / wave,
-        opacity: 1
+        vr: (Math.random() - 0.5) * (0.5 + closeness * 3.4),
+        delay: 0.2 + dist / 1700,
+        opacity: 1,
+        g: 1100 + Math.random() * 1500,
+        large: maxx - minx + (maxy - miny) > 220
       });
-    }
-
-    function panel(sel, split) {
-      var src = document.querySelector(sel);
-      if (!src) return;
-      var r = src.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > vh || r.width < 2 || r.height < 2) return;
-      var n = split || 1;
-      var i, h, y, wrap, clone, cut;
-      for (i = 0; i < n; i++) {
-        h = r.height / n;
-        y = r.top + i * h;
-        wrap = document.createElement("div");
-        clone = src.cloneNode(true);
-        clone.querySelectorAll("img, .icon-ring, .icon-track, .icon-cap, .hero-icon").forEach(function (node) {
-          node.remove();
-        });
-        cut = document.createElement("div");
-        cut.style.position = "absolute";
-        cut.style.left = "0";
-        cut.style.top = -i * h + "px";
-        cut.style.width = r.width + "px";
-        cut.appendChild(clone);
-        wrap.style.overflow = "hidden";
-        wrap.appendChild(cut);
-        addShard(wrap, r.left, y, r.width, h + 1, 280 + Math.random() * 220, 1300);
-      }
-    }
-
-    panel(".site-header", 1);
-    panel(".hero-copy", 3);
-
-    var img = stage.querySelector("img");
-    var ir = stage.getBoundingClientRect();
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var srcCanvas = document.createElement("canvas");
-    var size = Math.max(8, Math.round(ir.width * dpr));
-    srcCanvas.width = size;
-    srcCanvas.height = size;
-    var sctx = srcCanvas.getContext("2d");
-    roundedRect(sctx, 0, 0, size, size, size * 0.2237);
-    sctx.clip();
-    try {
-      sctx.drawImage(img, 0, 0, size, size);
-    } catch (err) {
-      sctx.fillStyle = "#14101c";
-      sctx.fill();
-    }
-
-    var cols = ir.width < 280 ? 5 : 6;
-    var rows = cols;
-    var tw = ir.width / cols;
-    var th = ir.height / rows;
-    var sw = size / cols;
-    var sh = size / rows;
-    var row, col, tile, tctx, hold;
-    for (row = 0; row < rows; row++) {
-      for (col = 0; col < cols; col++) {
-        tile = document.createElement("canvas");
-        tile.width = Math.ceil(sw);
-        tile.height = Math.ceil(sh);
-        tctx = tile.getContext("2d");
-        tctx.drawImage(srcCanvas, col * sw, row * sh, sw, sh, 0, 0, tile.width, tile.height);
-        var pix = tctx.getImageData(0, 0, tile.width, tile.height).data;
-        var lit = 0;
-        var pi;
-        for (pi = 0; pi < pix.length; pi += 16) {
-          if (pix[pi] + pix[pi + 1] + pix[pi + 2] > 80) lit++;
-        }
-        if (lit < 6) continue;
-        tile.style.width = "100%";
-        tile.style.height = "100%";
-        tile.style.display = "block";
-        hold = document.createElement("div");
-        hold.appendChild(tile);
-        addShard(
-          hold,
-          ir.left + col * tw,
-          ir.top + row * th,
-          tw + 0.6,
-          th + 0.6,
-          500 + Math.random() * 340,
-          650
-        );
-      }
     }
 
     document.body.appendChild(layer);
@@ -253,43 +467,52 @@
     canvas.style.height = vh + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    var dust = [];
-    var DUST_CAP = 70;
-    function spawnPuff(x, y, spread, burst, scale) {
-      if (dust.length >= DUST_CAP) return;
+    var sprites = [
+      makeSmokeSprite(96, 11),
+      makeSmokeSprite(96, 23),
+      makeSmokeSprite(128, 31),
+      makeSmokeSprite(128, 47),
+      makeSmokeSprite(160, 59)
+    ];
+    var SMOKE_CAP = 52;
+    var smoke = [];
+
+    function spawnSmoke(x, y, spread, burst, layerIdx, scale) {
+      if (smoke.length >= SMOKE_CAP) return;
       var a = Math.random() * Math.PI * 2;
-      var sp = (burst || 36) * (0.25 + Math.random() * 0.75);
-      var col = Math.random();
-      var color = col < 0.4 ? "166,156,144" : col < 0.75 ? "184,172,156" : "150,140,128";
-      dust.push({
+      var sp = (burst || 28) * (0.3 + Math.random() * 0.7);
+      smoke.push({
         x: x + (Math.random() - 0.5) * spread,
         y: y + (Math.random() - 0.5) * spread,
         vx: Math.cos(a) * sp,
-        vy: Math.sin(a) * sp * 0.4 - Math.random() * 18,
-        g: 22 + Math.random() * 32,
-        r: (scale || 1) * (26 + Math.random() * 58),
-        grow: 10 + Math.random() * 22,
-        life: 2.4 + Math.random() * 1.1,
+        vy: Math.sin(a) * sp * 0.3 - (18 + Math.random() * 36),
+        g: 14 + Math.random() * 28,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.35,
+        w: (scale || 1) * (70 + Math.random() * 110),
+        grow: 20 + Math.random() * 50,
+        life: 2.3 + Math.random() * 1.3,
         age: 0,
-        swirl: (Math.random() - 0.5) * 0.7,
-        a0: 0.12 + Math.random() * 0.18,
-        color: color
+        swirl: (Math.random() - 0.5) * 1.2,
+        a0: 0.18 + Math.random() * 0.22,
+        sprite: sprites[(layerIdx + Math.floor(Math.random() * 3)) % sprites.length],
+        layer: layerIdx || 0
       });
     }
-    var pi;
-    for (pi = 0; pi < 12; pi++) spawnPuff(ox, oy, 70, 46, 1);
-    for (pi = 0; pi < 6; pi++) spawnPuff(ox, oy, 50, 20, 1.6);
-    for (pi = 0; pi < 3; pi++) spawnPuff(ox, oy, 90, 12, 2.3);
-    for (var si = 0; si < shards.length; si++) {
-      if (Math.random() > 0.55) continue;
+
+    var si;
+    for (si = 0; si < 10; si++) spawnSmoke(ox, oy, 40, 36, 0, 1.5);
+    for (si = 0; si < 12; si++) spawnSmoke(ox, oy, 70, 48, 1, 1);
+    for (si = 0; si < 8; si++) spawnSmoke(ox, oy, 30, 22, 2, 0.7);
+    for (si = 0; si < shards.length; si++) {
+      if (!shards[si].large && Math.random() > 0.4) continue;
       var sl = shards[si].el.getBoundingClientRect();
-      spawnPuff(sl.left + sl.width / 2, sl.top + sl.height / 2, 22, 24, 0.75);
+      spawnSmoke(sl.left + sl.width / 2, sl.top + sl.height / 2, 18, 20, 1, 0.7);
     }
 
     var t0 = performance.now();
     var last = t0;
-    var gravity = 2000;
-    var DUST_END = 3200;
+    var DUST_END = 3300;
     var HOLD = 560;
     var done = false;
 
@@ -297,66 +520,77 @@
       var dt = Math.min(0.032, (now - last) / 1000);
       last = now;
       var t = now - t0;
-      var k, s, local, fade, p, alpha, sr, u, radius, grad, hz;
+      var k, s, local, fade, p, u, alpha, w, sr, crackA, e1, turb;
 
       for (k = 0; k < shards.length; k++) {
         s = shards[k];
         local = t / 1000 - s.delay;
         if (local > 0) {
-          s.vy += gravity * dt;
+          s.vy += s.g * dt;
           s.x += s.vx * dt;
           s.y += s.vy * dt;
           s.rot += s.vr * dt;
-          fade = 1 - Math.max(0, (local - 0.5) / 1.65);
+          fade = 1 - Math.max(0, (local - 0.7) / 1.7);
           s.opacity = Math.max(0, fade);
           s.el.style.transform =
             "translate3d(" + s.x + "px," + s.y + "px,0) rotate(" + s.rot + "rad)";
           s.el.style.opacity = String(s.opacity);
-          if (t < 2000 && s.opacity > 0.16 && Math.random() < 0.07) {
+          if (t < 2100 && s.large && s.opacity > 0.2 && Math.random() < 0.08) {
             sr = s.el.getBoundingClientRect();
-            spawnPuff(sr.left + sr.width / 2, sr.top + sr.height / 2, 16, 18, 0.7);
+            spawnSmoke(sr.left + sr.width / 2, sr.top + sr.height / 2, 14, 16, 1, 0.65);
           }
         }
       }
 
       ctx.clearRect(0, 0, vw, vh);
-      hz = 0.1;
-      if (t < 350) hz = 0.1 * (t / 350);
-      else if (t > 1800) hz = 0.1 * (1 - Math.min(1, (t - 1800) / (DUST_END - 1800)));
-      grad = ctx.createRadialGradient(ox, oy + t * 0.035, 20, ox, oy + 50, Math.max(vw, vh) * 0.5);
-      grad.addColorStop(0, "rgba(168,158,146," + hz.toFixed(3) + ")");
-      grad.addColorStop(1, "rgba(168,158,146,0)");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, vw, vh);
 
-      for (k = 0; k < dust.length; k++) {
-        p = dust[k];
+      if (t < 420) {
+        if (t < 90) crackA = t / 90;
+        else if (t < 200) crackA = 1;
+        else crackA = 1 - (t - 200) / 220;
+        ctx.save();
+        ctx.strokeStyle = "rgba(226,216,200," + (0.7 * crackA).toFixed(3) + ")";
+        ctx.lineWidth = 1.25;
+        ctx.lineJoin = "bevel";
+        for (k = 0; k < edges.length; k++) {
+          e1 = edges[k];
+          ctx.beginPath();
+          ctx.moveTo(e1[0][0], e1[0][1]);
+          ctx.lineTo(e1[1][0], e1[1][1]);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      smoke.sort(function (a, b) {
+        return a.layer - b.layer;
+      });
+      for (k = 0; k < smoke.length; k++) {
+        p = smoke[k];
         p.age += dt;
         if (p.age > p.life) continue;
-        p.vx += Math.sin(t / 900 + p.swirl) * 10 * dt * p.swirl;
-        p.vy += p.g * dt;
-        p.vx *= 0.968;
-        p.vy *= 0.982;
+        turb = Math.sin(t / 420 + p.swirl * 3);
+        p.vx += turb * 18 * dt * p.swirl;
+        p.vy += Math.cos(t / 380 + p.swirl) * 10 * dt;
+        // rise first, then settle
+        if (u = p.age / p.life, u < 0.4) p.vy -= 12 * dt;
+        else p.vy += p.g * dt;
+        p.vx *= 0.975;
+        p.vy *= 0.98;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        if (p.y > vh - 8) {
-          p.y = vh - 8;
-          p.vy *= 0.15;
-          p.vx *= 0.7;
-        }
+        p.rot += p.vr * dt;
         u = p.age / p.life;
-        fade = u < 0.18 ? u / 0.18 : 1 - (u - 0.18) / 0.82;
+        fade = u < 0.16 ? u / 0.16 : Math.pow(1 - (u - 0.16) / 0.84, 1.15);
         if (fade < 0) fade = 0;
         alpha = p.a0 * fade;
-        radius = p.r + p.grow * u;
-        grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-        grad.addColorStop(0, "rgba(" + p.color + "," + (alpha * 0.55).toFixed(3) + ")");
-        grad.addColorStop(0.4, "rgba(" + p.color + "," + (alpha * 0.28).toFixed(3) + ")");
-        grad.addColorStop(1, "rgba(" + p.color + ",0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        ctx.fill();
+        w = p.w + p.grow * u;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(p.sprite, -w * 0.5, -w * 0.55, w, w);
+        ctx.restore();
       }
 
       if (t < DUST_END) {
