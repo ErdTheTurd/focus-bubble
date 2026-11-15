@@ -26,6 +26,7 @@
   <!-- TODO: once blurzo.com is live, change canonical, og:url, og:image, and twitter:image to https://blurzo.com/ (and /privacy.html, /support.html, /images/og.jpg) -->
 </head>
 <body>
+  <div id="site">
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="header-inner">
@@ -39,7 +40,14 @@
   <main id="main">
     <section class="hero">
       <div class="hero-icon">
-        <img src="images/icon.png" width="1024" height="1024" alt="The Blurzo icon, a glass bubble with an orange countdown ring.">
+        <div class="icon-stage">
+          <img src="images/icon-bare.png" width="1024" height="1024" alt="The Blurzo icon, a glass bubble with an orange countdown ring.">
+          <span class="icon-track" aria-hidden="true"></span>
+          <span class="icon-ring" aria-hidden="true"></span>
+          <span class="icon-cap icon-cap-start" aria-hidden="true"></span>
+          <span class="icon-cap icon-cap-end" aria-hidden="true"></span>
+        </div>
+        <p class="icon-time" aria-live="polite" aria-atomic="true">0:30</p>
       </div>
       <div class="hero-copy">
         <h1>Blurzo</h1>
@@ -99,5 +107,7 @@
       </nav>
     </div>
   </footer>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
