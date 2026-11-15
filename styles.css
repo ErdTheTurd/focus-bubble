@@ -374,3 +374,135 @@ a:hover { color: var(--orange-hot); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* ----- Icon countdown ----- */
+
+.icon-stage {
+  position: relative;
+  border-radius: 22.37%;
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.55),
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.icon-stage img {
+  box-shadow: none;
+}
+
+.icon-ring,
+.icon-track,
+.icon-cap {
+  position: absolute;
+  pointer-events: none;
+}
+
+.icon-track,
+.icon-ring {
+  inset: 0;
+  border-radius: 22.37%;
+  -webkit-mask-image: radial-gradient(
+    closest-side,
+    transparent 26.55%,
+    #000 27.25%,
+    #000 31.15%,
+    transparent 31.95%
+  );
+  mask-image: radial-gradient(
+    closest-side,
+    transparent 26.55%,
+    #000 27.25%,
+    #000 31.15%,
+    transparent 31.95%
+  );
+}
+
+.icon-track {
+  background: #2c2734;
+  opacity: 0.55;
+}
+
+.icon-ring {
+  background: conic-gradient(
+    from -90deg,
+    #ffc27a 0deg,
+    #f69046 30deg,
+    #e87a32 calc(var(--p, 1) * 360deg),
+    transparent calc(var(--p, 1) * 360deg)
+  );
+}
+
+.icon-cap {
+  width: 2.45%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #f7a054;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.icon-time {
+  margin: 0.8rem 0 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Cap position is driven by JS so it stays on the ring. */
+.icon-cap.is-on {
+  transform: translate(-50%, -50%);
+}
+
+/* ----- Shatter overlay (created only during the explosion) ----- */
+
+html.is-exploding,
+html.is-exploding body {
+  overflow: hidden;
+}
+
+.shatter,
+.shatter-dust {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.shatter-dust { z-index: 41; }
+
+.shard {
+  position: fixed;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.shard-inner {
+  position: absolute;
+  margin: 0;
+}
+
+#site.enter {
+  animation: site-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes site-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site.enter {
+    animation: site-enter-fade 0.7s ease both;
+  }
+
+  @keyframes site-enter-fade {
+    from { opacity: 0; transform: none; }
+    to   { opacity: 1; transform: none; }
+  }
+}
