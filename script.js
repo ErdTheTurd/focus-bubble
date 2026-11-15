@@ -5,10 +5,9 @@
   var ring = document.querySelector(".icon-ring");
   var capStart = document.querySelector(".icon-cap-start");
   var capEnd = document.querySelector(".icon-cap-end");
-  var timeEl = document.querySelector(".icon-time");
   var stage = document.querySelector(".icon-stage");
   var site = document.getElementById("site");
-  if (!ring || !stage || !site || !timeEl) return;
+  if (!ring || !stage || !site) return;
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var params = new URLSearchParams(window.location.search);
@@ -21,14 +20,6 @@
   var raf = 0;
   var exploding = false;
   var pending = false;
-  var lastShown = "";
-
-  function formatTime(ms) {
-    var t = Math.max(0, Math.ceil(ms / 1000));
-    var m = Math.floor(t / 60);
-    var s = t % 60;
-    return m + ":" + (s < 10 ? "0" : "") + s;
-  }
 
   function placeCap(el, ang, color) {
     if (!el) return;
@@ -59,14 +50,6 @@
     placeCap(capEnd, -Math.PI / 2 + p * Math.PI * 2, p < 0.14 ? "#e06828" : "#f7a054");
   }
 
-  function setTime(ms) {
-    var label = formatTime(ms);
-    if (label !== lastShown) {
-      lastShown = label;
-      timeEl.textContent = label;
-    }
-  }
-
   function atTop() {
     return (window.scrollY || document.documentElement.scrollTop || 0) < TOP_SLACK;
   }
@@ -76,10 +59,8 @@
     var left = DURATION - (now - startAt);
     var p = Math.max(0, left / DURATION);
     setProgress(p);
-    setTime(left);
     if (left <= 0) {
       setProgress(0);
-      setTime(0);
       if (atTop()) explode();
       else pending = true;
       return;
@@ -90,9 +71,7 @@
   function startTimer() {
     if (raf) cancelAnimationFrame(raf);
     startAt = performance.now();
-    lastShown = "";
     setProgress(1);
-    setTime(DURATION);
     raf = requestAnimationFrame(tick);
   }
 
@@ -204,7 +183,6 @@
 
     panel(".site-header", 1);
     panel(".hero-copy", 3);
-    panel(".icon-time", 1);
 
     var img = stage.querySelector("img");
     var ir = stage.getBoundingClientRect();
