@@ -254,33 +254,45 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     var dust = [];
-    function spawn(n, x, y, spread) {
-      var i, a, sp, col, life;
+    var DUST_CAP = 900;
+    function spawn(n, x, y, spread, burst) {
+      var i, a, sp, col, life, color;
+      if (dust.length >= DUST_CAP) return;
+      if (dust.length + n > DUST_CAP) n = DUST_CAP - dust.length;
       for (i = 0; i < n; i++) {
         a = Math.random() * Math.PI * 2;
-        sp = Math.random() * 300 + 30;
+        sp = (burst || 240) * (0.2 + Math.random());
         col = Math.random();
-        life = 1.5 + Math.random() * 1.7;
+        life = 1.4 + Math.random() * 1.5;
+        if (col < 0.22) color = "255,248,236";
+        else if (col < 0.5) color = "236,226,210";
+        else if (col < 0.78) color = "255,196,120";
+        else color = "246,160,80";
         dust.push({
           x: x + (Math.random() - 0.5) * spread,
           y: y + (Math.random() - 0.5) * spread,
-          vx: Math.cos(a) * sp * (0.35 + Math.random()),
-          vy: Math.sin(a) * sp * 0.5 - Math.random() * 200,
-          g: 540 + Math.random() * 360,
-          s: 0.6 + Math.random() * 2.2,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp * 0.55 - Math.random() * 160,
+          g: 260 + Math.random() * 240,
+          s: 1 + Math.random() * 3,
           life: life,
           age: 0,
-          color: col < 0.4 ? "244,232,210" : col < 0.72 ? "176,156,136" : "246,144,70"
+          swirl: (Math.random() - 0.5) * 2.4,
+          color: color
         });
       }
     }
-    spawn(90, ox, oy, 36);
-    spawn(28, vw * 0.66, vh * 0.42, 80);
+    spawn(320, ox, oy, 42, 460);
+    spawn(100, ox, oy, 110, 200);
+    for (var si = 0; si < shards.length; si++) {
+      var sl = shards[si].el.getBoundingClientRect();
+      spawn(8, sl.left + sl.width / 2, sl.top + sl.height / 2, 18, 170);
+    }
 
     var t0 = performance.now();
     var last = t0;
     var gravity = 2000;
-    var DUST_END = 3200;
+    var DUST_END = 3000;
     var HOLD = 420;
     var done = false;
 
@@ -288,7 +300,7 @@
       var dt = Math.min(0.032, (now - last) / 1000);
       last = now;
       var t = now - t0;
-      var k, s, local, fade, p, alpha;
+      var k, s, local, fade, p, alpha, sr;
 
       for (k = 0; k < shards.length; k++) {
         s = shards[k];
@@ -303,6 +315,10 @@
           s.el.style.transform =
             "translate3d(" + s.x + "px," + s.y + "px,0) rotate(" + s.rot + "rad)";
           s.el.style.opacity = String(s.opacity);
+          if (t < 1800 && s.opacity > 0.12 && Math.random() < 0.2) {
+            sr = s.el.getBoundingClientRect();
+            spawn(2, sr.left + sr.width / 2, sr.top + sr.height / 2, 12, 90);
+          }
         }
       }
 
@@ -311,17 +327,20 @@
         p = dust[k];
         p.age += dt;
         if (p.age > p.life) continue;
+        p.vx += Math.sin(t / 260 + p.swirl) * 50 * dt * p.swirl;
+        p.vy += Math.cos(t / 300) * 16 * dt;
         p.vy += p.g * dt;
-        p.vx *= 0.993;
+        p.vx *= 0.994;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         if (p.y > vh - 2) {
           p.y = vh - 2;
-          p.vy *= -0.12;
-          p.vx *= 0.65;
+          p.vy *= -0.1;
+          p.vx *= 0.6;
         }
-        alpha = 1 - p.age / p.life;
-        ctx.fillStyle = "rgba(" + p.color + "," + (alpha * 0.78).toFixed(3) + ")";
+        alpha = Math.min(1, (1 - p.age / p.life) * 1.15);
+        if (alpha > 1) alpha = 1;
+        ctx.fillStyle = "rgba(" + p.color + "," + alpha.toFixed(3) + ")";
         ctx.fillRect(p.x, p.y, p.s, p.s);
       }
 
